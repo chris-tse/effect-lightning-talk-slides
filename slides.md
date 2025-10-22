@@ -88,9 +88,7 @@ class: text-center
 layout: center
 ---
 
-# Enter Effect
-
-Next-Generation TypeScript
+## Enter Effect
 
 The `Effect` type:
 
@@ -120,6 +118,8 @@ const parseNumber = (s: string) => {
   return Number(s)
 }
 
+//      ┌─── number
+//      ▼
 const parsed = parseNumber("42")
 console.log(`Parsed: ${parsed}`)
 ```
@@ -140,25 +140,26 @@ console.log(`Parsed: ${parsed}`)
 
 <div class="flex flex-col justify-center items-center h-full">
 
+<v-click>
+
 ```ts
 import { Effect } from "effect"
 
-function parseNumber(s: string): Effect.Effect<number, Error> {
+
+function parseNumber(s: string) {
   return isNaN(Number(s))
     ? Effect.fail(new Error("Not a number"))
     : Effect.succeed(Number(s))
 }
 
 const program = Effect.gen(function*() {
+  //       ┌─── Effect.Effect<number, Error, never>
+  //       ▼
   const parsed = yield* parseNumber("42")
   yield* Effect.log(`Parsed: ${parsed}`)
-})
-
-// Alternatively:
-// const program = parseNumber("42").pipe(
-//   Effect.andThen((parsed) => Effect.log(parsed))
-// )
+}).pipe(NodeRuntime.runMain)
 ```
+</v-click>
 
 <v-click>
 <ul class="mt-8">
@@ -189,12 +190,27 @@ you’ll eventually end up creating what Effect provides:
 
 </v-click>
 
-<v-click>
+---
+layout: center
+---
 
-> Effect just formalizes what you’ll *eventually* build anyway.
-
-</v-click>
-
+```ts
+const fetchUser = (
+  id: number
+): Effect.Effect<
+  unknown,
+  HttpClientError | TimeoutException
+> =>
+  httpClient.get(`/todos/${id}`).pipe(
+    Effect.andThen((response) => response.json),
+    Effect.timeout("1 second"),
+    Effect.retry({
+      schedule: Schedule.exponential(1000),
+      times: 3
+    }),
+    Effect.withSpan("getTodo", { attributes: { id } })
+  )
+```
 ---
 layout: center
 ---
@@ -203,12 +219,12 @@ layout: center
 
 <v-click>
 
-For FP fans:  
-That `Effect<A, E, R>` type? It’s a **monad**. 🌀
-
-Everything in Effect is **functional and composable**.
+> For FP fans:  
+> That `Effect<A, E, R>` type? It’s a **monad**.  
+> Everything in Effect is **functional and composable**.
 
 </v-click>
+
 
 <v-click>
 
@@ -224,16 +240,15 @@ And it ships with a full toolkit:
 layout: quote
 ---
 
-> TypeScript makes JavaScript safer.  
-> **Effect makes TypeScript honest.**
-
-<v-click>
-
-[effect.website](https://effect.website) • [effect.kitlangton.com](https://effect.kitlangton.com)  
-
-Because TypeScript shouldn’t just type your *happy paths* —  
-it should type your **real ones.**
-
-</v-click>
+TypeScript makes JavaScript safer.  
+**Effect makes TypeScript honest.**
 
 ---
+layout: default
+---
+
+## Resources
+
+- [Official docs](https://effect.website)
+- [Visual Effect](https://effect.kitlangton.com)  
+
