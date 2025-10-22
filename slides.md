@@ -109,8 +109,19 @@ class: text-sm
 
 ### Before
 
-<div class="flex flex-col justify-center items-center h-full">
+<div class="h-full flex flex-col justify-center items-center">
 
+````md magic-move
+```ts
+const parseNumber = (s: string) => {
+  if (isNaN(Number(s))) 
+    throw new Error("Not a number")
+  return Number(s)
+}
+
+const parsed = parseNumber("42")
+console.log(`Parsed: ${parsed}`)
+```
 ```ts
 const parseNumber = (s: string) => {
   if (isNaN(Number(s))) 
@@ -123,25 +134,49 @@ const parseNumber = (s: string) => {
 const parsed = parseNumber("42")
 console.log(`Parsed: ${parsed}`)
 ```
+````
 
-<v-click>
-<ul class="mt-8">
-  <li>Errors are implicit</li>
-  <li>Type system doesn't know it throws</li>
-</ul>
-</v-click>
 
 </div>
 
 ::right::
 
-### After
+<v-click>
 
+<div class="h-full grid place-items-center">
+  <ul>
+    <li>Errors are implicit</li>
+    <li>Type system doesn't know it throws</li>
+  </ul>
+</div>
+
+</v-click>
+
+---
+layout: two-cols
+class: text-sm
+---
+
+### After
 
 <div class="flex flex-col justify-center items-center h-full">
 
-<v-click>
+````md magic-move
+```ts
+import { Effect } from "effect"
 
+
+function parseNumber(s: string) {
+  return isNaN(Number(s))
+    ? Effect.fail(new Error("Not a number"))
+    : Effect.succeed(Number(s))
+}
+
+const program = Effect.gen(function*() {
+  const parsed = yield* parseNumber("42")
+  yield* Effect.log(`Parsed: ${parsed}`)
+}).pipe(NodeRuntime.runMain)
+```
 ```ts
 import { Effect } from "effect"
 
@@ -159,17 +194,23 @@ const program = Effect.gen(function*() {
   yield* Effect.log(`Parsed: ${parsed}`)
 }).pipe(NodeRuntime.runMain)
 ```
-</v-click>
-
-<v-click>
-<ul class="mt-8">
-  <li>✅ Errors are explicit</li>
-  <li>✅ TypeScript enforces awareness</li>
-  <li>✅ Still just JavaScript</li>
-</ul>
-</v-click>
+````
 
 </div>
+
+::right::
+
+<v-click>
+
+<div class="h-full grid place-items-center">
+  <ul>
+    <li>✅ Errors are explicit</li>
+    <li>✅ TypeScript enforces awareness</li>
+  </ul>
+</div>
+
+</v-click>
+
 
 
 ---
@@ -194,14 +235,16 @@ you’ll eventually end up creating what Effect provides:
 layout: center
 ---
 
+## An Effectful fetchUser
+
 ```ts
 const fetchUser = (
-  id: number
+  id: string
 ): Effect.Effect<
   unknown,
   HttpClientError | TimeoutException
 > =>
-  httpClient.get(`/todos/${id}`).pipe(
+  httpClient.get(`/api/users/${id}`).pipe(
     Effect.andThen((response) => response.json),
     Effect.timeout("1 second"),
     Effect.retry({
@@ -215,7 +258,7 @@ const fetchUser = (
 layout: center
 ---
 
-# 🧊 This is just the **tip of the iceberg**
+# Just the **tip of the iceberg**
 
 <v-click>
 
